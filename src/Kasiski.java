@@ -42,36 +42,21 @@ public class Kasiski {
     public static int encontrarComprimentoChaveProvavel(Map<String, Set<Integer>> distancias) {
         Map<Integer, Integer> contagemFatores = new HashMap<>();
 
-        // Fatora cada distância e conta a frequência dos fatores
-        int totalWords = 0;
+        // Fatora cada distância e conta a frequência dos fatores, considerando cada fator único por distância
         for (Set<Integer> distanciasSet : distancias.values()) {
             for (Integer distancia : distanciasSet) {
                 List<Integer> fatores = Fatoracao.fatoresPrimos(distancia);
-                for (Integer fator : fatores) {
+                Set<Integer> fatoresUnicos = new HashSet<>(fatores);
+                for (Integer fator : fatoresUnicos) {
                     contagemFatores.put(fator, contagemFatores.getOrDefault(fator, 0) + 1);
-                    totalWords++;
                 }
             }
         }
 
-        // Ordena os fatores pela sua frequência de forma descendente
-        Map<Integer, Integer> fatoresOrdenados = contagemFatores.entrySet().stream()
-                .sorted(Map.Entry.<Integer, Integer>comparingByValue().reversed())
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1, e2) -> e1,
-                        LinkedHashMap::new));
-
-        // Imprime a frequência e porcentagem de cada fator
-        int finalTotalWords = totalWords;
-
-        fatoresOrdenados.forEach((fator, frequencia) -> {
-            double percentual = (double) frequencia / finalTotalWords * 100;
-            System.out.printf("Num de palavras fatorizáveis por %2d: %d (%.2f%%)\n", fator, frequencia, percentual);
-        });
-
-        // Retorna o fator mais frequente como o comprimento da chave mais provável
-        return fatoresOrdenados.keySet().iterator().next();
+        // Ordena os fatores pela sua frequência de forma descendente e seleciona o mais frequente
+        return contagemFatores.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(1); // Retorna 1 se nenhum fator for encontrado, o que indica um erro na análise
     }
 }

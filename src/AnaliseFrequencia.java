@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AnaliseFrequencia {
@@ -7,6 +9,7 @@ public class AnaliseFrequencia {
         PORTUGUES, INGLES
     }
 
+    private static final Character[] ALFABETO = "abcdefghijklmnopqrstuvwxyz".chars().mapToObj(c -> (char)c).toArray(Character[]::new);
     private static final Map<Character, Double> FREQUENCIAS_PORT = new HashMap<>();
     private static final Map<Character, Double> FREQUENCIAS_ING = new HashMap<>();
     private static Map<Character, Double> frequenciasAtuais;
@@ -85,5 +88,54 @@ public class AnaliseFrequencia {
         FREQUENCIAS_ING.put('x', 0.150);
         FREQUENCIAS_ING.put('y', 1.974);
         FREQUENCIAS_ING.put('z', 0.074);
+    }
+
+    // Divide o texto cifrado em N grupos com base no comprimento da chave
+    public static List<StringBuilder> dividirEmGrupos(String textoCifrado, int comprimentoChave) {
+        List<StringBuilder> grupos = new ArrayList<>();
+        for (int i = 0; i < comprimentoChave; i++) {
+            grupos.add(new StringBuilder());
+        }
+
+        for (int i = 0; i < textoCifrado.length(); i++) {
+            char c = textoCifrado.charAt(i);
+            grupos.get(i % comprimentoChave).append(c);
+        }
+
+        return grupos;
+    }
+
+    public static String analisarFrequenciaDosGrupos(List<StringBuilder> grupos, Idioma idioma) {
+        setFrequencias(idioma);
+        StringBuilder chave = new StringBuilder();
+
+        for (StringBuilder grupo : grupos) {
+            char letraChaveMaisProvavel = 'a';
+            double minDiferenca = Double.MAX_VALUE;
+
+            for (int deslocamento = 0; deslocamento < ALFABETO.length; deslocamento++) {
+                double somaQuadradosDiferencas = 0;
+
+                for (char letra : ALFABETO) {
+                    // Correção: Calcula o deslocamento inverso para simular deciframento
+                    int indiceOriginal = (letra - 'a' - deslocamento + ALFABETO.length) % ALFABETO.length;
+                    char letraOriginal = ALFABETO[indiceOriginal];
+
+                    double freqObservada = (double) grupo.chars().filter(ch -> ch == letra).count() / grupo.length();
+                    double freqEsperada = frequenciasAtuais.getOrDefault(letraOriginal, 0.0);
+
+                    somaQuadradosDiferencas += Math.pow(freqObservada - freqEsperada, 2) / freqEsperada;
+                }
+
+                if (somaQuadradosDiferencas < minDiferenca) {
+                    minDiferenca = somaQuadradosDiferencas;
+                    letraChaveMaisProvavel = ALFABETO[deslocamento];
+                }
+            }
+
+            chave.append(letraChaveMaisProvavel);
+        }
+
+        return chave.toString();
     }
 }

@@ -6,18 +6,20 @@ import java.util.Set;
 public class Main {
     public static void main(String[] args) {
         try {
-            String text = Reader.readText("src/textos/20201-teste1.txt");
-            Set<String> repeatingWords = Kasiski.getRepeatingWords(text);
-            Map<String, Set<Integer>> distances = Kasiski.getDistances(text, repeatingWords);
+            String textoCifrado = Reader.readText("src/textos/20201-teste2.txt");
 
-            repeatingWords.forEach(word -> {
-                System.out.println("Palavra: " + word + " | Distâncias: " + distances.get(word));
-            });
+            Set<String> palavrasRepetidas = Kasiski.getRepeatingWords(textoCifrado);
+            Map<String, Set<Integer>> distancias = Kasiski.getDistances(textoCifrado, palavrasRepetidas);
+            int tamanhoChave = Kasiski.encontrarComprimentoChaveProvavel(distancias);
 
-            System.out.println(Kasiski.encontrarComprimentoChaveProvavel(distances));
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
+            List<StringBuilder> grupos = AnaliseFrequencia.dividirEmGrupos(textoCifrado, tamanhoChave);
+            String chave = AnaliseFrequencia.analisarFrequenciaDosGrupos(grupos, AnaliseFrequencia.Idioma.PORTUGUES);
+
+            String textoDescriptografado = Vigenere.descriptografar(textoCifrado, chave);
+
+            System.out.println(textoDescriptografado);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
