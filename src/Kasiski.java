@@ -1,3 +1,5 @@
+import textos.Fatoracao;
+
 import java.util.*;
 
 public class Kasiski {
@@ -38,6 +40,28 @@ public class Kasiski {
         return distances;
     }
 
+    public static int encontrarComprimentoChaveProvavel(Map<String, Set<Integer>> distancias) {
+        Map<Integer, Integer> contagemFatores = new HashMap<>();
 
+        // Fatora cada distância e conta a frequência dos fatores
+        for (Set<Integer> distanciasSet : distancias.values()) {
+            for (Integer distancia : distanciasSet) {
+                List<Integer> fatores = Fatoracao.fatoresPrimos(distancia);
+                fatores.forEach(fator -> contagemFatores.put(fator, contagemFatores.getOrDefault(fator, 0) + 1));
+            }
+        }
 
+        // Encontra o fator mais comum
+        int comprimentoChaveMaisProvavel = 1;
+        int maximaFrequencia = 0;
+
+        for (Map.Entry<Integer, Integer> entrada : contagemFatores.entrySet()) {
+            if (entrada.getValue() > maximaFrequencia) {
+                maximaFrequencia = entrada.getValue();
+                comprimentoChaveMaisProvavel = entrada.getKey();
+            }
+        }
+
+        return comprimentoChaveMaisProvavel;
+    }
 }
